@@ -40,6 +40,6 @@ int main(void)
         break;
     }
     */
-    printf("Merci d'avoir jouer :)\n");
+    printf("\nMerci d'avoir jouer :)\n");
     return 0;
 }

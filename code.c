@@ -16,15 +16,14 @@ int lancement_du_jeu()
            "--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
 
     printf("Bonjour !!! Que veut tu faire ?\n");
-     int choix = 0;
-    while(choix == 0 ){
+     int choix;
+    do {
         printf("Nouvelle partie (1)\n"
-            "Charger une partie (2)\n"
-        );
+            "Charger une partie (2)\n");
         scanf("%d", &choix);
-        switch (choix){
+
+        switch (choix) {
             case 1:
-                printf("Vous avez choisi l'option 1.\n");
                 break;
 
             case 2:
@@ -32,12 +31,11 @@ int lancement_du_jeu()
 
             default:
                 printf("\nChoix invalide.\n"
-                    "Veuillez rentrer une réponse correcte !!!\n\n"
-                );
-                choix = 0;
+                    "Veuillez rentrer une réponse correcte !!!\n\n");
                 break;
         }
-    }
+    } while (choix != 1 && choix != 2);
+
     return choix;
 }
 
@@ -46,15 +44,7 @@ DonneesJeu chargement_partie(int choix, DonneesJeu jeu, char nom_fichier[]){
     DonneesJeu jeuCharge;
 
     if(choix == 1){
-        printf("Création du personnage en cour\n");
-        printf(
-                "Quel est votre pseudo ?"
-            );
-        scanf("%s", jeu.nom);
-        sprintf(nom_fichier, "%s.dat", jeu.nom);
-        printf("%s\n", nom_fichier);
-        initialisation_joueur(&jeu);
-        afficher_stat(jeu);
+        initialisation_joueur(&jeu, nom_fichier);
         sauvegarder(nom_fichier, &jeu);
         return jeu;
     }
@@ -62,24 +52,16 @@ DonneesJeu chargement_partie(int choix, DonneesJeu jeu, char nom_fichier[]){
     {
         printf("\nQuel était votre pseudo ?\n");
         scanf("%s", nom_fichier);
-        //Merci chatGPG, j'avais rien compris au problème, ici ça venant d'un danger de dépassement de tampon. Donc désormais personne peut me hacker :)
-        /*
-        if (strlen(nom_fichier) + 4 >= sizeof(nom_fichier)) {
-            fprintf(stderr, "Erreur : Nom de fichier trop long.\n");
-        } else {
-            sprintf(nom_fichier, "%s.dat", nom_fichier);
-        }*/
         sprintf(nom_fichier, "%s.dat", nom_fichier);
 
-        //printf("%s\n", nom_fichier);
         charger(nom_fichier, &jeuCharge);
         printf("Bon retour parmi nous %s !!!\n", jeuCharge.nom);
+        afficher_stat(jeuCharge);
         return  jeuCharge;
     }
-    return;
+    return jeu;
 }
 
-// Fonction pour sauvegarder les données du jeu dans un fichier
 void sauvegarder(const char* nomFichier, const DonneesJeu* jeu) {
     FILE* fichier = fopen(nomFichier, "wb");
     if (fichier != NULL) {
@@ -90,7 +72,6 @@ void sauvegarder(const char* nomFichier, const DonneesJeu* jeu) {
     }
 }
 
-// Fonction pour charger les données du jeu à partir d'un fichier
 void charger(const char* nomFichier, DonneesJeu* jeu) {
     FILE* fichier = fopen(nomFichier, "rb");
     if (fichier != NULL) {
@@ -110,12 +91,62 @@ int action() {
     return choix;
 }
 
-void initialisation_joueur(DonneesJeu * Player)
+void initialisation_joueur(DonneesJeu * jeu, char nom_fichier[])
 {
-    Player->level = 1;
-    Player->pv = 1;
-    Player->force = 1;
-    Player->pm = 0;
+    printf("\n[Création du personnage]\n"
+    "\nQuel est votre pseudo ?\n"
+    );
+    scanf("%s", jeu->nom);
+    printf("\nBienvenue %s\n\n", jeu->nom);
+    sprintf(nom_fichier, "%s.dat", jeu->nom);
+    jeu->level = 10;
+    jeu->pv = 10;
+    jeu->force = 10;
+    jeu->pm = 10;
+    choisir_race(jeu);
+    afficher_stat(*jeu);
+}
+
+void afficher_race(){
+    printf("Liste des races disponibles :\n\n"
+        "(1) [Humain] ==> [Force] + 1\n"
+        "         ==> [PV] + 1\n"
+        "         ==> [PM] - 1 \n\n"
+        "(2) [Elfe]   ==> [Force] - 1\n"
+        "         ==> [PV] + 1\n"
+        "         ==> [PM] + 2\n\n"
+        "(3) [Nain]   ==> [Force] + 2\n"
+        "         ==> [PV] + 1\n"
+        "         ==> [PM] - 1\n\n"
+    );
+}
+
+void choisir_race(DonneesJeu * jeu){
+    printf("[Choix de la Race]\n");
+    afficher_race();
+    int choix;
+    scanf("%d", &choix);
+
+    switch (choix) {
+        case 1: //Humain
+            jeu->pv += 1;
+            jeu->pm += 1;
+            jeu->force +=1;
+            break;
+        case 2: //Elfe
+            jeu->pv += 1;
+            jeu->pm += 2;
+            jeu->force -=1;
+            break;
+        case 3: //Nain
+            jeu->pv += 1;
+            jeu->pm -= 1;
+            jeu->force += 2;
+            break;
+        default:
+            printf("Choix indisponible");
+            break;
+    }
 }
 
 void afficher_stat(DonneesJeu Player)
